@@ -7,67 +7,11 @@ import (
 )
 
 func main() {
-  // qwe1 := distance("String1", "String1q")
-  qwe1 := distance("BANANAS", "BANANAS")
-  // qwe2 := weighted_distance("String1", "String1q", float32(2))
-
-  log.Printf("distance: %v", qwe1)
-  // log.Printf("weighted_distance: %v", qwe2)
+  log.Printf("distance: %v", distance("BANANAS", "BANANAQ", float32(5)))
 }
 
-func distance(s1 string, s2 string) float32 {
+func distance(a string, b string, limit float32) float32 {
   defer timeTrack(time.Now(), "distance")
-
-  if len(s1) == 0 {
-    return float32(utf8.RuneCountInString(s2))
-  }
-
-  if len(s2) == 0 {
-    return float32(utf8.RuneCountInString(s1))
-  }
-
-  if s1 == s2 {
-    return 0
-  }
-
-  lenS1 := len(s1)
-  lenS2 := len(s2)
-
-  // init the row
-  x := make([]float32, lenS1+1)
-  // we start from 1 because index 0 is already 0.
-  for i := 1; i < len(x); i++ {
-    x[i] = float32(i)
-  }
-
-  // make a dummy bounds check to prevent the 2 bounds check down below.
-  // The one inside the loop is particularly costly.
-  _ = x[lenS1]
-  // fill in the rest
-  for i := 1; i <= lenS2; i++ {
-    prev := float32(i)
-    var current float32
-    for j := 1; j <= lenS1; j++ {
-      if s2[i-1] == s1[j-1] {
-        current = x[j-1] // match
-      } else {
-        deletion_cost := float32(0.2)
-        insertion_cost := float32(2.5)
-        substitution_cost := float32(3.5)
-
-        current = minFloat32(minFloat32(x[j-1]+substitution_cost, prev+insertion_cost), x[j]+deletion_cost)
-        // current = minfloat32(minfloat32(x[j-1]+1, prev+1), x[j]+1)
-      }
-      x[j-1] = prev
-      prev = current
-    }
-    x[lenS1] = prev
-  }
-  return float32(x[lenS1])
-}
-
-func weighted_distance(a string, b string, limit float32) float32 {
-  defer timeTrack(time.Now(), "weighted_distance")
 
   if len(a) == 0 {
     return float32(utf8.RuneCountInString(b))
@@ -88,10 +32,6 @@ func weighted_distance(a string, b string, limit float32) float32 {
   s1 := []rune(a)
   s2 := []rune(b)
 
-  // swap to save some memory O(min(a,b)) instead of O(a)
-  if len(s1) > len(s2) {
-    s1, s2 = s2, s1
-  }
   lenS1 := len(s1)
   lenS2 := len(s2)
 
@@ -103,9 +43,9 @@ func weighted_distance(a string, b string, limit float32) float32 {
   // }
 
   // create two work vectors of floating point (i.e. weighted) distances
-  v0 := make([]float32, lenS1+1)
-  v1 := make([]float32, lenS1+1)
-  vtemp := make([]float32, lenS1+1)
+  v0 := make([]float32, lenS2+1)
+  v1 := make([]float32, lenS2+1)
+  vtemp := make([]float32, lenS2+1)
 
   // initialize v0 (the previous row of distances)
   // this row is A[0][i]: edit distance for an empty s1
@@ -124,7 +64,7 @@ func weighted_distance(a string, b string, limit float32) float32 {
 
   // make a dummy bounds check to prevent the 2 bounds check down below.
   // The one inside the loop is particularly costly.
-  _ = v0[lenS1]
+  _ = v0[lenS2]
 
   for i := 0; i < lenS1; i++ {
     // for (int i = 0; i < s1.length(); i++) {
@@ -146,7 +86,7 @@ func weighted_distance(a string, b string, limit float32) float32 {
       substitution_cost := float32(0)
       if s1i != s2j {
         // substitution_cost = charsub.cost(s1i, s2j)
-        substitution_cost = 1
+        substitution_cost = substitutionCost(s1i, s2j)
       }
       // substitution_cost := float32(1)
       insertion_cost := insertionCost(s2j)
@@ -194,7 +134,7 @@ func minFloat32(a, b float32) float32 {
 
 func insertionCost(c rune) float32 {
   // if (charchange == null) {
-  return 1.0
+  return 2.0
   // } else {
   //     return charchange.insertionCost(c);
   // }
@@ -202,15 +142,19 @@ func insertionCost(c rune) float32 {
 
 func deletionCost(c rune) float32 {
   // if (charchange == null) {
+  // if c == 'S' {
+  //  return 0.5
+  // } else {
   return 1.0
+  // }
   // } else {
   //     return charchange.deletionCost(c);
   // }
 }
 
-func substitutionCost(c rune) float32 {
+func substitutionCost(c1 rune, c2 rune) float32 {
   // if (charchange == null) {
-  return 1.0
+  return 2.5
   // } else {
   //     return charchange.substitutionCost(c);
   // }
