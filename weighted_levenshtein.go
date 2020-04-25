@@ -4,7 +4,9 @@ import (
   "unicode/utf8"
 )
 
-func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
+var defaultWeight = float64(1)
+
+func Distance(a string, b string, weights map[rune]map[rune]float64) float64 {
   if len(a) == 0 {
     return float64(utf8.RuneCountInString(b))
   }
@@ -32,12 +34,9 @@ func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
   v1 := make([]float64, lenS2+1)
   vtemp := make([]float64, lenS2+1)
 
-  // initialize v0 (the previous row of distances)
-  // this row is A[0][i]: edit distance for an empty s1
-  // the distance is the cost of inserting each character of s2
   // we start from 1 because index 0 is already 0.
   for i := 1; i < len(v0); i++ {
-    v0[i] = v0[i-1] + insertionCost(s2[i-1], costs)
+    v0[i] = v0[i-1] + insertionWeight(s2[i-1], weights)
   }
 
   // make a dummy bounds check to prevent the 2 bounds check down below.
@@ -46,36 +45,35 @@ func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
 
   for i := 0; i < lenS1; i++ {
     s1i := s1[i]
-    deletion_cost := deletionCost(s1i, costs)
+    deletion_weight := deletionWeight(s1i, weights)
 
     // calculate v1 (current row distances) from the previous row v0
     // first element of v1 is A[i+1][0]
     // Edit distance is the cost of deleting characters from s1
     // to match empty t.
-    v1[0] = v0[0] + deletion_cost
+    v1[0] = v0[0] + deletion_weight
 
     minv1 := v1[0]
 
     // use formula to fill in the rest of the row
     for j := 0; j < lenS2; j++ {
       s2j := s2[j]
-      substitution_cost := float64(0)
+      substitution_weight := float64(0)
       if s1i != s2j {
-        substitution_cost = substitutionCost(s1i, s2j, costs)
+        substitution_weight = substitutionWeight(s1i, s2j, weights)
       }
-      insertion_cost := insertionCost(s2j, costs)
+      insertion_weight := insertionWeight(s2j, weights)
 
-      v1[j+1] = minFloat64(
-        v1[j]+insertion_cost, // Cost of insertion
-        minFloat64(
-          v0[j+1]+deletion_cost,    // Cost of deletion
-          v0[j]+substitution_cost)) // Cost of substitution
+      v1[j+1] = min(
+        v1[j]+insertion_weight, // Weight of insertion
+        min(
+          v0[j+1]+deletion_weight,    // Weight of deletion
+          v0[j]+substitution_weight)) // Weight of substitution
 
-      minv1 = minFloat64(minv1, v1[j+1])
+      minv1 = min(minv1, v1[j+1])
     }
 
-    // copy v1 (current row) to v0 (previous row) for next iteration
-    //System.arraycopy(v1, 0, v0, 0, v0.length);
+    // Copy v1 (current row) to v0 (previous row) for next iteration
     // Flip references to current and previous row
     vtemp = v0
     v0 = v1
@@ -85,21 +83,39 @@ func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
   return v0[lenS2]
 }
 
-func minFloat64(a, b float64) float64 {
+func min(a, b float64) float64 {
   if a < b {
     return a
   }
   return b
 }
 
-func insertionCost(c rune, costs map[rune]map[rune]float64) float64 {
-  return costs[' '][c]
+func insertionWeight(c rune, weights map[rune]map[rune]float64) float64 {
+  weight := weights[' '][c]
+
+  if weight == 0 {
+    weight = defaultWeight
+  }
+
+  return weight
 }
 
-func deletionCost(c rune, costs map[rune]map[rune]float64) float64 {
-  return costs[c][' ']
+func deletionWeight(c rune, weights map[rune]map[rune]float64) float64 {
+  weight := weights[c][' ']
+
+  if weight == 0 {
+    weight = defaultWeight
+  }
+
+  return weight
 }
 
-func substitutionCost(c1 rune, c2 rune, costs map[rune]map[rune]float64) float64 {
-  return costs[c1][c2]
+func substitutionWeight(c1 rune, c2 rune, weights map[rune]map[rune]float64) float64 {
+  weight := weights[c1][c2]
+
+  if weight == 0 {
+    weight = defaultWeight
+  }
+
+  return weight
 }
