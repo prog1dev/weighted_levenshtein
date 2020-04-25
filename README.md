@@ -1,5 +1,4 @@
-Weighed Levenshtein
-------------
+## Weighed Levenshtein
 
 This implementation of Levenshtein allows to define different weights for character addition, deletion and substitution.
 
@@ -9,13 +8,12 @@ For human typo correction, cost of substituting 'E' and 'R' is lower because the
 
 If you are doing OCR correction, maybe substituting '0' for 'O' should have a smaller cost than substituting 'X' for 'O'.
 
-Installation
-------------
+## Installation
 
 ```go get github.com/prog1dev/weighed_levenshtein```
 
-Usage Example
--------------
+## Usage Example
+
 ```
 package main
 
@@ -49,8 +47,11 @@ func main() {
   fmt.Printf("The distance between %v and %v is %v\n", s1, s2, levenshtein.Distance(s1, s2, weights))
 }
 ```
-TODO
--------------
+### TODO
 
 - add support for transposition edit
 - add tests
+
+## LICENSE
+
+MIT © [Ivan Filenko](https://github.com/prog1dev)
