@@ -1,30 +1,10 @@
 package weighted_levenshtein
 
 import (
-  "bufio"
-  "fmt"
-  "log"
-  "os"
-  "strconv"
-  "strings"
-  "time"
   "unicode/utf8"
 )
 
-// func main() {
-//   costs := make(map[rune]map[rune]float64)
-//   // readFile(costs, "/Users/filenkoivan/go/src/analyze_es_picks/symbol_statistics_moscow_77")
-//   readFile(costs, "/Users/filenkoivan/go/src/analyze_es_picks/new_symbol_statistics")
-//   // log.Printf("costs len: %v", len(costs))
-
-//   dist := distance("аэрапор внук", "аэропорт внук", costs)
-//   log.Printf("distance: %v", dist)
-//   // log.Printf("P(orig|fix): %v", math.Pow(1234, (-dist)))
-// }
-
 func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
-  defer timeTrack(time.Now(), "distance")
-
   if len(a) == 0 {
     return float64(utf8.RuneCountInString(b))
   }
@@ -122,56 +102,4 @@ func deletionCost(c rune, costs map[rune]map[rune]float64) float64 {
 
 func substitutionCost(c1 rune, c2 rune, costs map[rune]map[rune]float64) float64 {
   return costs[c1][c2]
-}
-
-func timeTrack(start time.Time, name string) {
-  elapsed := time.Since(start)
-  log.Printf("%s took %s", name, elapsed)
-}
-
-func readFile(costs map[rune]map[rune]float64, filepath string) {
-  if !FileExists(filepath) {
-    errorMessage := fmt.Sprintf("[SPELL CHECKER]: does not exist %v", filepath)
-    log.Println(errorMessage)
-  }
-
-  file, _ := os.Open(filepath) //nolint
-
-  scanner := bufio.NewScanner(file)
-
-  for scanner.Scan() {
-    parts := strings.Split(scanner.Text(), "\t")
-
-    if len(parts) == 2 {
-      s1 := ' '
-      s2 := []rune(parts[0])[0]
-      frequency, _ := strconv.ParseFloat(parts[1], 64)
-
-      if costs[s1] == nil {
-        costs[s1] = make(map[rune]float64)
-      }
-
-      costs[s1][s2] = frequency
-    } else if len(parts) == 3 {
-      s1 := []rune(parts[0])[0]
-      s2 := []rune(parts[1])[0]
-      frequency, _ := strconv.ParseFloat(parts[2], 64)
-
-      if costs[s1] == nil {
-        costs[s1] = make(map[rune]float64)
-      }
-
-      costs[s1][s2] = frequency
-    }
-  }
-
-  file.Close()
-}
-
-func FileExists(name string) bool {
-  _, err := os.Stat(name)
-  if os.IsNotExist(err) {
-    return false
-  }
-  return err == nil
 }
