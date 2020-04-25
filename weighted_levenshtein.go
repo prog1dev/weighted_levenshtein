@@ -22,7 +22,7 @@ import (
 //   // log.Printf("P(orig|fix): %v", math.Pow(1234, (-dist)))
 // }
 
-func distance(a string, b string, costs map[rune]map[rune]float64) float64 {
+func Distance(a string, b string, costs map[rune]map[rune]float64) float64 {
   defer timeTrack(time.Now(), "distance")
 
   if len(a) == 0 {
