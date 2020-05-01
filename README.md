@@ -10,7 +10,7 @@ If you are doing OCR correction, maybe substituting '0' for 'O' should have a sm
 
 ## Installation
 
-```go get github.com/prog1dev/weighed_levenshtein```
+```go get -u github.com/prog1dev/weighed_levenshtein```
 
 ## Usage Example
 
@@ -27,9 +27,9 @@ func main() {
   weights['s'] = make(map[rune]float64)
   weights[' '] = make(map[rune]float64)
 
-  weights['s'][' '] = float64(0.5) // weight of addition
-  weights[' ']['d'] = float64(0.6) // weight of deletion
-  weights['s']['a'] = float64(0.3) // weight of substitution
+  weights['s'][' '] = float64(0.5) // weight of addition 's' char
+  weights[' ']['d'] = float64(0.6) // weight of deletion 'd' char
+  weights['s']['a'] = float64(0.3) // weight of substitution 's' to 'a'
 
   s1 := "bananas"
   s2 := "banana"
@@ -51,6 +51,7 @@ func main() {
 
 - add support for transposition edit
 - add tests
+- add docs
 
 ## LICENSE
 
