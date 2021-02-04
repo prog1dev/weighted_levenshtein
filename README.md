@@ -10,7 +10,7 @@ If you are doing OCR correction, maybe substituting '0' for 'O' should have a sm
 
 ## Installation
 
-```go get -u github.com/prog1dev/weighed_levenshtein```
+```go get -u github.com/prog1dev/weighted_levenshtein```
 
 ## Usage Example
 
@@ -19,7 +19,7 @@ package main
 
 import (
   "fmt"
-  levenshtein "github.com/prog1dev/weighed_levenshtein"
+  levenshtein "github.com/prog1dev/weighted_levenshtein"
 )
 
 func main() {
