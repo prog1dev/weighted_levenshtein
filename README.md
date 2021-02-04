@@ -1,4 +1,4 @@
-## Weighed Levenshtein
+## Weighted Levenshtein
 
 This implementation of Levenshtein allows to define different weights for character addition, deletion and substitution.
 
